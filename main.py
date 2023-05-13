@@ -3,30 +3,22 @@ import numpy as np
 import pandas as pd
 import json
 from torch.utils.data import Dataset, DataLoader
-np.
-np.
-class BoolQDataset(Dataset):
+
+class BQDataset():
     def __init__(self, path):
-        with open(path) as f:
-            data = json.load(f)
-        self.questions = [d['question'] for d in data]
-        self.passages = [d['passage'] for d in data]
-        self.answers = [int(d['answer']) for d in data]
+        self.dataset = open(path,encoding="utf-8")
 
-    def __len__(self):
-        return len(self.questions)
+        self.dataset = [json.loads(instance) for instance in self.dataset ]
 
-    def __getitem__(self, idx):
-        return self.questions[idx], self.passages[idx], self.answers[idx]
+    def get_dataset(self):
+        return self.dataset
+#
+# train_dataset = BoolQDataset('datasets/train.jsonl')
+# val_dataset = BoolQDataset('datasets/dev.jsonl')
+#test_dataset = BoolQDataset('test.json')
 
-train_dataset = BoolQDataset('train.json')
-val_dataset = BoolQDataset('val.json')
-test_dataset = BoolQDataset('test.json')
 
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32)
-test_loader = DataLoader(test_dataset, batch_size=32)
+bqd = BQDataset("datasets/train.jsonl")
+a = bqd.get_dataset()[1]
 
-print(dataset)
-
-np.
+print(a["question"])
