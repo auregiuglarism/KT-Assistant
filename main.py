@@ -13,9 +13,6 @@ class BQDataset():
     def get_dataset(self):
         return self.dataset
 #
-# train_dataset = BoolQDataset('datasets/train.jsonl')
-# val_dataset = BoolQDataset('datasets/dev.jsonl')
-#test_dataset = BoolQDataset('test.json')
 
 
 bqd = BQDataset("datasets/train.jsonl")
