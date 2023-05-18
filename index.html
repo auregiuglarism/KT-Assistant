@@ -1,158 +1,204 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <title>Natural Language Machine Learning Model</title>
     <style>
         body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      min-height: 100vh;
-      margin: 0;
-      background-color: #f8f9fa;
-      font-family: Arial, sans-serif;
-    }
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
 
-    h1 {
-      color: #212529;
-    }
+        h1 {
+            color: #212529;
+        }
 
-    label {
-      display: block;
-      margin-top: 20px;
-    }
+        .loading-circle {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-    input[type="file"],
-    textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: 1px solid #ced4da;
-      border-radius: 0.25rem;
-    }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
 
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 0.25rem;
-      background-color: #007bff;
-      color: #ffffff;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+        label {
+            display: block;
+            margin-top: 20px;
+        }
 
-    #answer-area {
-      margin-top: 20px;
-      color: #212529;
-    }
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+        }
 
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 0.25rem;
+            background-color: #007bff;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* #prediction-result {
+    font-size: 18px;
+    margin-top: 20px;
+  } */
+        #prediction-result {
+            height: 4em;
+            border: 1px solid #ced4da;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 18px;
+
+            margin-top: 20px;
+            color: #212529;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
     <!-- Step 1: Document Upload -->
-    <div id="step1">
-      <h1>Upload Your Document</h1>
-      <div>
-        <label for="file-upload">Upload a text file:</label>
-        <input type="file" id="file-upload" accept=".txt">
-      </div>
-      <div>
-        <label for="text-input">Or paste your text below:</label>
-        <textarea id="text-input" rows="10" cols="50"></textarea>
-      </div>
-      <button id="upload-button">Train Model</button>
+    <div id="step1" class='step'>
+        <h1>Upload Your Document</h1>
+        <div>
+            <label for="file-upload">Upload a text file:</label>
+            <input type="file" id="file-upload" accept=".txt">
+        </div>
+        <div>
+            <label for="text-input">Or paste your text below:</label>
+            <textarea id="text-input" rows="10" cols="50"></textarea>
+        </div>
+        <button onclick="trainModel()">Train Model</button>
     </div>
 
     <!-- Step 2: Loading Page -->
-    <div id="step2" style="display:none;">
-      <h1>Loading...</h1>
-      <!-- Placeholder for loading icon -->
+    <div id="step2" class="step" style="display:none;">
+        <h1>Step 2: Model Training</h1>
+        <div class="loading-circle"></div>
     </div>
 
     <!-- Step 3: Ask Questions -->
-    <div id="step3" style="display:none;">
-      <h1>Ask Your Questions</h1>
-      <div>
-        <label for="question-input">Insert your claim:</label>
-        <textarea id="question-input" rows="5" cols="50"></textarea>
-      </div>
-      <button id="submit-button">Submit</button>
-      <div id="answer-area">
-        <!-- Placeholder for model's answer -->
-      </div>
+    <div id="step3" class='step' style="display:none;">
+        <h1>Ask Your Questions</h1>
+        <div>
+            <label for="question-input">Insert your claim:</label>
+            <textarea id="question-input" rows="5" cols="50"></textarea>
+        </div>
+        <button onclick="predict()">Submit</button>
+        <div id="prediction-result" style="display: none">
+            <!-- Placeholder for model's answer -->
+        </div>
     </div>
 
-    <script>
-      // Step 1: Document Upload
-      document.getElementById('upload-button').addEventListener('click', function() {
-        let text = '';
+    <script>// Global variables
+        // Global variables
+        let documentText = "";
+        let modelTrained = false;
 
-        // Check if file is uploaded
-        const file = document.getElementById('file-upload').files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.readAsText(file, 'UTF-8');
-          reader.onload = function(evt) {
-            text = evt.target.result;
-            trainModel(text);
-          }
-        } else {
-          // If not, use pasted text
-          text = document.getElementById('text-input').value;
-          trainModel(text);
+        // Function to handle Step 1 - Train Model
+        function trainModel() {
+            const fileUpload = document.getElementById("file-upload");
+            const textInput = document.getElementById("text-input");
+
+            if (fileUpload.files.length > 0) {
+                // User uploaded a text file
+                const file = fileUpload.files[0];
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    documentText = event.target.result;
+                    proceedToStep2();
+                };
+                reader.readAsText(file);
+            } else if (textInput.value.trim() !== "") {
+                // User pasted text
+                documentText = textInput.value.trim();
+                proceedToStep2();
+            }
         }
-      });
 
-      // Function to send text to server and train model
-      function trainModel(text) {
-        document.getElementById('step1').style.display = 'none';
-        document.getElementById('step3').style.display = 'block';
+        // Function to proceed to Step 2 - Model Training
+        function proceedToStep2() {
+            // Show Step 2
+            hideAllSteps();
+            document.getElementById("step2").style.display = "block";
 
-        fetch('your-server-url/path-to-model-training', {
-          method: 'POST',
-          body: JSON.stringify({ text: text }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('step2').style.display = 'none';
-          document.getElementById('step3').style.display = 'block';
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-      }
+            // Simulate model training (setTimeout is used as a placeholder)
+            setTimeout(function () {
+                modelTrained = true;
+                proceedToStep3();
+            }, 2000);
+        }
 
-      // Step 3: Ask Questions
-      document.getElementById('submit-button').addEventListener('click', function() {
-        const claim = document.getElementById('question-input').value;
+        // Function to proceed to Step 3 - Ask Questions and Make Claims
+        function proceedToStep3() {
+            // Show Step 3
+            hideAllSteps();
+            document.getElementById("step3").style.display = "block";
+        }
 
-        fetch('your-server-url/path-to-model-prediction', {
-          method: 'POST',
-          body: JSON.stringify({ claim: claim }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('answer-area').textContent = data.answer ? 'True' : 'False';
-        })
-        .catch((error) => {
-          console.error('Error:', error);
-        });
-      });
+        // Function to handle Step 3 - Prediction
+        function predict() {
+            if (modelTrained) {
+                const userInput = document.getElementById("question-input").value.trim();
+                // You can perform prediction using the user input and the documentText
+                // For simplicity, let's assume the prediction result is a boolean value (true/false)
+                const predictionResult = true; // Replace this with your actual prediction logic
 
+                displayPredictionResult(predictionResult);
+            }
+        }
+
+        // Function to display the prediction result
+        function displayPredictionResult(result) {
+            const predictionResultDiv = document.getElementById("prediction-result");
+            predictionResultDiv.textContent = result ? "True" : "False";
+            predictionResultDiv.style.display = "flex";
+        }
+
+        // Function to hide all steps
+        function hideAllSteps() {
+            const steps = document.getElementsByClassName("step");
+            for (let i = 0; i < steps.length; i++) {
+                steps[i].style.display = "none";
+            }
+        }
+
+        // Show Step 1 initially
+        document.getElementById("step1").style.display = "block";
 
     </script>
 
-  </body>
+</body>
+
 </html>
