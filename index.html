@@ -1,60 +1,158 @@
-<h1>hello from gh-pages</h1>
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Chatbot Website</title>
-  <style>
-    /* CSS styles for chat container and chat messages */
-    .chat-container {
-      width: 400px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+  <head>
+    <title>Natural Language Machine Learning Model</title>
+    <style>
+        body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f8f9fa;
+      font-family: Arial, sans-serif;
     }
-    
-    .message {
-      background-color: #f1f1f1;
+
+    h1 {
+      color: #212529;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+    }
+
+    input[type="file"],
+    textarea {
+      width: 100%;
       padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
+      margin-top: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
     }
-    
-    .user-message {
-      background-color: #e2f0ff;
-    }
-    
-    .bot-message {
-      background-color: #f9f9f9;
-    }
-  </style>
-</head>
-<body>
-  <div class="chat-container">
-    <div id="chat-log"></div>
-    <input type="text" id="user-input" placeholder="Type your message..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
 
-  <script>
-    // JavaScript code for sending and displaying messages
-    function sendMessage() {
-      var userInput = document.getElementById("user-input").value;
-      if (userInput !== "") {
-        var userMessage = "<div class='message user-message'>" + userInput + "</div>";
-        document.getElementById("chat-log").innerHTML += userMessage;
-        document.getElementById("user-input").value = "";
-        // Call the bot function to get a response
-        getBotResponse(userInput);
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 0.25rem;
+      background-color: #007bff;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #answer-area {
+      margin-top: 20px;
+      color: #212529;
+    }
+
+    </style>
+  </head>
+  <body>
+    <!-- Step 1: Document Upload -->
+    <div id="step1">
+      <h1>Upload Your Document</h1>
+      <div>
+        <label for="file-upload">Upload a text file:</label>
+        <input type="file" id="file-upload" accept=".txt">
+      </div>
+      <div>
+        <label for="text-input">Or paste your text below:</label>
+        <textarea id="text-input" rows="10" cols="50"></textarea>
+      </div>
+      <button id="upload-button">Train Model</button>
+    </div>
+
+    <!-- Step 2: Loading Page -->
+    <div id="step2" style="display:none;">
+      <h1>Loading...</h1>
+      <!-- Placeholder for loading icon -->
+    </div>
+
+    <!-- Step 3: Ask Questions -->
+    <div id="step3" style="display:none;">
+      <h1>Ask Your Questions</h1>
+      <div>
+        <label for="question-input">Insert your claim:</label>
+        <textarea id="question-input" rows="5" cols="50"></textarea>
+      </div>
+      <button id="submit-button">Submit</button>
+      <div id="answer-area">
+        <!-- Placeholder for model's answer -->
+      </div>
+    </div>
+
+    <script>
+      // Step 1: Document Upload
+      document.getElementById('upload-button').addEventListener('click', function() {
+        let text = '';
+
+        // Check if file is uploaded
+        const file = document.getElementById('file-upload').files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.readAsText(file, 'UTF-8');
+          reader.onload = function(evt) {
+            text = evt.target.result;
+            trainModel(text);
+          }
+        } else {
+          // If not, use pasted text
+          text = document.getElementById('text-input').value;
+          trainModel(text);
+        }
+      });
+
+      // Function to send text to server and train model
+      function trainModel(text) {
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step3').style.display = 'block';
+
+        fetch('your-server-url/path-to-model-training', {
+          method: 'POST',
+          body: JSON.stringify({ text: text }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('step2').style.display = 'none';
+          document.getElementById('step3').style.display = 'block';
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
       }
-    }
 
-    function getBotResponse(userInput) {
-      // Here you can add your chatbot logic and generate a response
-      // For simplicity, let's just echo back the user's message
-      var botMessage = "<div class='message bot-message'>" + userInput + "</div>";
-      document.getElementById("chat-log").innerHTML += botMessage;
-    }
-  </script>
-</body>
+      // Step 3: Ask Questions
+      document.getElementById('submit-button').addEventListener('click', function() {
+        const claim = document.getElementById('question-input').value;
+
+        fetch('your-server-url/path-to-model-prediction', {
+          method: 'POST',
+          body: JSON.stringify({ claim: claim }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('answer-area').textContent = data.answer ? 'True' : 'False';
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      });
+
+
+    </script>
+
+  </body>
 </html>

@@ -1,0 +1,178 @@
+<h1>KT - ASSISTANCE</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Natural Language Model Showcase</title>
+  <style>body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  
+  .step {
+    display: none;
+    margin-top: 40px;
+  }
+  
+  .step h1 {
+    font-size: 24px;
+  }
+  
+  .step div {
+    margin-top: 20px;
+  }
+  
+  #file-upload,
+  #text-paste {
+    display: block;
+    margin: 10px auto;
+  }
+  
+  button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .loading-circle {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  textarea {
+    width: 400px;
+    height: 200px;
+    resize: none;
+    margin: 10px auto;
+  }
+  
+  #prediction-result {
+    font-size: 18px;
+    margin-top: 20px;
+  }
+  </style> 
+</head>
+<body>
+  <div id="step1" class="step">
+    <h1>Step 1: Upload or Paste the Document</h1>
+    <div>
+      <input type="file" id="file-upload" accept=".txt" />
+      <label for="file-upload">Upload a Text File</label>
+    </div>
+    <div>
+      <textarea id="text-paste" placeholder="Paste Text Here"></textarea>
+    </div>
+    <button onclick="trainModel()">Train Model</button>
+  </div>
+
+  <div id="step2" class="step">
+    <h1>Step 2: Model Training</h1>
+    <div class="loading-circle"></div>
+  </div>
+
+  <div id="step3" class="step">
+    <h1>Step 3: Ask Questions and Make Claims</h1>
+    <div>
+      <textarea id="user-input" placeholder="Ask a question or make a claim"></textarea>
+    </div>
+    <button onclick="predict()">Submit</button>
+    <div id="prediction-result"></div>
+  </div>
+
+    <script>// Global variables
+        let documentText = "";
+        let modelTrained = false;
+        
+        // Function to handle Step 1 - Train Model
+        function trainModel() {
+          const fileUpload = document.getElementById("file-upload");
+          const textPaste = document.getElementById("text-paste");
+        
+          if (fileUpload.files.length > 0) {
+            // User uploaded a text file
+            const file = fileUpload.files[0];
+            const reader = new FileReader();
+            reader.onload = function (event) {
+              documentText = event.target.result;
+              proceedToStep2();
+            };
+            reader.readAsText(file);
+          } else if (textPaste.value.trim() !== "") {
+            // User pasted text
+            documentText = textPaste.value.trim();
+            proceedToStep2();
+          }
+        }
+        
+        // Function to proceed to Step 2 - Model Training
+        function proceedToStep2() {
+          // Show Step 2
+          hideAllSteps();
+          document.getElementById("step2").style.display = "block";
+        
+          // Simulate model training (setTimeout is used as a placeholder)
+          setTimeout(function () {
+            modelTrained = true;
+            proceedToStep3();
+          }, 2000);
+        }
+        
+        // Function to proceed to Step 3 - Ask Questions and Make Claims
+        function proceedToStep3() {
+          // Show Step 3
+          hideAllSteps();
+          document.getElementById("step3").style.display = "block";
+        }
+        
+        // Function to handle Step 3 - Prediction
+        function predict() {
+          if (modelTrained) {
+            const userInput = document.getElementById("user-input").value.trim();
+            // You can perform prediction using the user input and the documentText
+            // For simplicity, let's assume the prediction result is a boolean value (true/false)
+            const predictionResult = true; // Replace this with your actual prediction logic
+        
+            displayPredictionResult(predictionResult);
+          }
+        }
+        
+        // Function to display the prediction result
+        function displayPredictionResult(result) {
+          const predictionResultDiv = document.getElementById("prediction-result");
+          predictionResultDiv.textContent = result ? "True" : "False";
+        }
+        
+        // Function to hide all steps
+        function hideAllSteps() {
+          const steps = document.getElementsByClassName("step");
+          for (let i = 0; i < steps.length; i++) {
+            steps[i].style.display = "none";
+          }
+        }
+        
+        // Show Step 1 initially
+        document.getElementById("step1").style.display = "block";
+        </script>
+
+        
+</body>
+</html>
