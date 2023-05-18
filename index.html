@@ -1,1 +1,60 @@
 <h1>hello from gh-pages</h1>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Chatbot Website</title>
+  <style>
+    /* CSS styles for chat container and chat messages */
+    .chat-container {
+      width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    
+    .message {
+      background-color: #f1f1f1;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+    }
+    
+    .user-message {
+      background-color: #e2f0ff;
+    }
+    
+    .bot-message {
+      background-color: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div id="chat-log"></div>
+    <input type="text" id="user-input" placeholder="Type your message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <script>
+    // JavaScript code for sending and displaying messages
+    function sendMessage() {
+      var userInput = document.getElementById("user-input").value;
+      if (userInput !== "") {
+        var userMessage = "<div class='message user-message'>" + userInput + "</div>";
+        document.getElementById("chat-log").innerHTML += userMessage;
+        document.getElementById("user-input").value = "";
+        // Call the bot function to get a response
+        getBotResponse(userInput);
+      }
+    }
+
+    function getBotResponse(userInput) {
+      // Here you can add your chatbot logic and generate a response
+      // For simplicity, let's just echo back the user's message
+      var botMessage = "<div class='message bot-message'>" + userInput + "</div>";
+      document.getElementById("chat-log").innerHTML += botMessage;
+    }
+  </script>
+</body>
+</html>
