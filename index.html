@@ -131,20 +131,52 @@
             const fileUpload = document.getElementById("file-upload");
             const textInput = document.getElementById("text-input");
 
+            console.log(fileUpload.files.length)
             if (fileUpload.files.length > 0) {
                 // User uploaded a text file
                 const file = fileUpload.files[0];
                 const reader = new FileReader();
                 reader.onload = function (event) {
                     documentText = event.target.result;
-                    proceedToStep2();
+                    sendDocumentToServer(documentText);
                 };
                 reader.readAsText(file);
             } else if (textInput.value.trim() !== "") {
                 // User pasted text
                 documentText = textInput.value.trim();
-                proceedToStep2();
+                sendDocumentToServer(documentText);
             }
+        }
+
+        // Function to send the document text to the server and train the model
+        function sendDocumentToServer(text) {
+          // Transition to the loading screen
+            proceedToStep2();
+
+          // Send the document text to the server
+          fetch('http://127.0.0.1:5000/path-to-model-training', {
+            method: 'POST',
+            body: JSON.stringify({ text: text }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => {
+            // Check for HTTP errors
+            if (!response.ok) {
+              throw new Error('HTTP error, status = ' + response.status);
+            }
+
+            modelTrained = true;
+            // Transition to the question-asking screen
+            proceedToStep3();
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert("Error: " + error);
+            // Handle error
+            // You may want to show an error message and go back to Step 1
+          });
         }
 
         // Function to proceed to Step 2 - Model Training
@@ -152,12 +184,6 @@
             // Show Step 2
             hideAllSteps();
             document.getElementById("step2").style.display = "block";
-
-            // Simulate model training (setTimeout is used as a placeholder)
-            setTimeout(function () {
-                modelTrained = true;
-                proceedToStep3();
-            }, 2000);
         }
 
         // Function to proceed to Step 3 - Ask Questions and Make Claims
@@ -171,12 +197,38 @@
         function predict() {
             if (modelTrained) {
                 const userInput = document.getElementById("question-input").value.trim();
-                // You can perform prediction using the user input and the documentText
-                // For simplicity, let's assume the prediction result is a boolean value (true/false)
-                const predictionResult = true; // Replace this with your actual prediction logic
-
-                displayPredictionResult(predictionResult);
+                sendClaimToServer(userInput);
+            }else{
+                alert("Please train the model first!");
             }
+        }
+
+        // Function to send the claim to the server and receive the prediction
+        function sendClaimToServer(claim) {
+          // Send the claim to the server
+          fetch('http://127.0.0.1:5000/path-to-model-prediction', {
+            method: 'POST',
+            body: JSON.stringify({ claim: claim }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          .then(response => {
+            // Check for HTTP errors
+            if (!response.ok) {
+              throw new Error('HTTP error, status = ' + response.status);
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Display the prediction
+            displayPredictionResult(data.answer)
+          })
+          .catch((error) => {
+            console.error('Error:', error);
+            alert("Error: " + error)
+            // Handle error
+          });
         }
 
         // Function to display the prediction result
